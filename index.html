@@ -1,1 +1,366 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebration Surprise 🎉</title>
+    <link rel="preconnect" href="googleapis.com">
+    <link rel="preconnect" href="gstatic.com" crossorigin>
+    <link href="googleapis.com" rel="stylesheet">
+    
+    <style>
+        /* MOBILE FIRST GLOBAL RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            background-color: #050508;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            color: #fff;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* INTRO START OVERLAY */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f111a;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+
+        .play-trigger {
+            background: #ff4757;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 16px 40px;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+            letter-spacing: 1px;
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        audio {
+            display: none;
+        }
+
+        /* MAIN TIMELINE CONTAINER */
+        .timeline-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: #000;
+        }
+
+        /* BEAT-SYNCED VIDEO SEGMENTS - OPTIMIZED FOR PHONES */
+        .clip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end; /* Pushes text content to the bottom */
+            align-items: center;
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            padding-bottom: 50px; /* Safe space from screen bottom */
+        }
+
+        /* HIGH-CONTRAST GRADIENT OVERLAY TO KEEP TEXT READABLE AT BOTTOM */
+        .clip::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+            z-index: 1;
+        }
+
+        /* PHONE POSITIONED HIGH-CONTRAST TYPOGRAPHY */
+        .celebration-text {
+            font-size: 3rem; /* Scaled down for perfect display on mobile viewports */
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 900;
+            line-height: 1.0;
+            letter-spacing: 0px;
+            font-family: 'Archivo Black', sans-serif;
+            color: #fff;
+            text-shadow: 3px 3px 0px #ff4757, -2px -2px 0px rgba(0,0,0,0.8);
+            z-index: 2;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* CLEAN SPEED MOVEMENT MODIFIERS */
+        .smooth-zoom {
+            animation: slowZoomPulse 2.4s infinite ease-in-out, subtleWobble 1.2s infinite alternate;
+        }
+        .text-pop-1 { animation: textScale 1.2s infinite alternate ease-in-out; }
+
+        .distortion-slide {
+            animation: fastSlideGlitch 0.35s infinite ease-in-out;
+        }
+        .text-pop-2 { animation: textStretch 0.35s infinite alternate; }
+
+        .wobble-spin {
+            animation: heavyWobble 1.8s infinite linear;
+        }
+        .text-pop-3 { animation: textScale 0.9s infinite alternate; }
+
+        .heavy-bounce {
+            animation: verticalBounce 0.8s infinite ease-in-out;
+        }
+        .text-pop-4 { animation: textStretch 0.4s infinite alternate; }
+
+        .climax-grind {
+            animation: ultimateVibe 0.6s infinite, slowZoomPulse 2s infinite;
+        }
+        .text-pop-5 { animation: textScale 0.6s infinite alternate; }
+
+        /* COURSE REP NOTE POSITIONED PERFECTLY AT BOTTOM ZONE */
+        #course-rep-card {
+            position: absolute;
+            bottom: -100%; /* Inverted transition direction to fall up/in from bottom */
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 92%;
+            max-width: 440px;
+            background: rgba(15, 17, 26, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            display: none;
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+        }
+
+        /* Positions the layout card precisely at phone base area */
+        #course-rep-card.triggered {
+            display: block !important;
+            bottom: 30px;
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .rep-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ff4757;
+            margin-bottom: 8px;
+        }
+
+        .rep-body {
+            font-size: 1rem;
+            color: #f1f2f6;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* RESPONSIVE LAYOUT SCALING CARD EXTENSION FOR LAPTOPS */
+        @media (min-width: 768px) {
+            .celebration-text { font-size: 5rem; }
+            .clip { padding-bottom: 80px; }
+            #course-rep-card.triggered { bottom: 50px; }
+            .rep-title { font-size: 2rem; }
+            .rep-body { font-size: 1.2rem; }
+        }
+
+        /* ====== KEYFRAME ANIMATION PACK ====== */
+        @keyframes slowZoomPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes subtleWobble {
+            0% { transform: rotate(-0.5deg); }
+            100% { transform: rotate(0.5deg); }
+        }
+
+        @keyframes fastSlideGlitch {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-6px, 4px); filter: brightness(1.1); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes heavyWobble {
+            0% { transform: rotate(0deg); }
+            33% { transform: rotate(-3deg); }
+            66% { transform: rotate(3deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes verticalBounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes ultimateVibe {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(2px, -2px); }
+        }
+
+        @keyframes textScale {
+            0% { transform: scale(0.9); }
+            100% { transform: scale(1.05); }
+        }
+
+        @keyframes textStretch {
+            0% { transform: scaleX(0.9) scaleY(1.05); }
+            100% { transform: scaleX(1.05) scaleY(0.9); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- START DROP SCREEN OVERLAY -->
+    <div id="intro-overlay">
+        <button class="play-trigger" onclick="startCelebration()">Open Surprise 🎁</button>
+    </div>
+
+    <!-- NON-AI ORIGINAL STUDIO RECORDING WEB AUDIO STREAM -->
+    <audio id="birthdayTrack" src="google.com" loop crossorigin="anonymous"></audio>
+
+    <!-- LIVE TIMELINE LAYOUT -->
+    <div class="timeline-container" id="timeline">
+        
+        <!-- CLIP 1 -->
+        <div class="clip smooth-zoom" id="clip1" style="background-image: url('pic1.jpeg');">
+            <div class="celebration-text text-pop-1">HAPPY BIRTHDAY 🎉</div>
+        </div>
+
+        <!-- CLIP 2 -->
+        <div class="clip distortion-slide" id="clip2" style="background-image: url('pic2.jpeg');">
+            <div class="celebration-text text-pop-2">BIG DAY 🎂</div>
+        </div>
+
+        <!-- CLIP 3 -->
+        <div class="clip wobble-spin" id="clip3" style="background-image: url('pic3.jpeg');">
+            <div class="celebration-text text-pop-3">CELEBRATE ✨</div>
+        </div>
+
+        <!-- CLIP 4 -->
+        <div class="clip heavy-bounce" id="clip4" style="background-image: url('pic4.jpeg');">
+            <div class="celebration-text text-pop-4">SHINE BRIGHT 💎</div>
+        </div>
+
+        <!-- CLIP 5 -->
+        <div class="clip climax-grind" id="clip5" style="background-image: url('pic5.jpeg');">
+            <div class="celebration-text text-pop-5">CHEERS 🥂</div>
+        </div>
+
+        <!-- COURSE REP FALL & FADE IN TRIBUTE CONTAINER (BOTTOM POSITIONED) -->
+        <div id="course-rep-card">
+            <h2 class="rep-title">To Our Course Rep! 👑</h2>
+            <p class="rep-body">
+                Wishing you long life, immense prosperity, and excellent success in all your academic endeavors. Thank you for your leadership and dedication to the department! Cheers to your new age!
+            </p>
+        </div>
+
+    </div>
+
+    <!-- TIMELINE VIDEO CONTROL ENGINE -->
+    <script>
+        const track = document.getElementById('birthdayTrack');
+        const overlay = document.getElementById('intro-overlay');
+        const timeline = document.getElementById('timeline');
+        const repCard = document.getElementById('course-rep-card');
+        
+        const clips = [
+            document.getElementById('clip1'),
+            document.getElementById('clip2'),
+            document.getElementById('clip3'),
+            document.getElementById('clip4'),
+            document.getElementById('clip5')
+        ];
+
+        function startCelebration() {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 800);
+            timeline.style.display = 'block';
+            track.play();
+            
+            runImageSequencer();
+            scheduleCourseRepNote();
+        }
+
+        function clearAllClips() {
+            clips.forEach(clip => clip.style.display = 'none');
+        }
+
+        function runImageSequencer() {
+            let step = 0;
+
+            function playSequenceLoop() {
+                clearAllClips();
+                
+                if (step === 0) {
+                    clips[0].style.display = 'flex';
+                    setTimeout(() => { step = 1; playSequenceLoop(); }, 2500); 
+                } 
+                else if (step === 1) {
+                    clips[1].style.display = 'flex';
+                    setTimeout(() => { step = 2; playSequenceLoop(); }, 2000); 
+                } 
+                else if (step === 2) {
+                    clips[2].style.display = 'flex'; 
+                    setTimeout(() => { step = 3; playSequenceLoop(); }, 2800); 
+                } 
+                else if (step === 3) {
+                    clips[3].style.display = 'flex'; 
+                    setTimeout(() => { step = 4; playSequenceLoop(); }, 2200); 
+                } 
+                else if (step === 4) {
+                    clips[4].style.display = 'flex'; 
+                    setTimeout(() => { step = 0; playSequenceLoop(); }, 3000); 
+                }
+            }
+
+            playSequenceLoop();
+        }
+
+        function scheduleCourseRepNote() {
+            setTimeout(() => {
+                repCard.style.display = 'block';
+                setTimeout(() => {
+                    repCard.classList.add('triggered');
+                }, 50);
+            }, 20000); // Triggers exactly at the 20-second mark
+        }
+    </script>
+</body>
+</html>
